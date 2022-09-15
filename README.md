@@ -19,7 +19,6 @@ Create a new file named `.env` on the project root (the same level/folder as pac
 ```
 DATABASE_CONNECTION_STRING=url://connection@string/to/postgress/database
 ```
-
 ## Scripts
 
 ### Running Tests
