@@ -2,13 +2,16 @@ const test = require("ava");
 const { knex } = require("../../database");
 const topicModel = require(".");
 const weekModel = require("../week");
+const instructorModel = require("../instructor");
 
 test.beforeEach(async () => {
   // Clear the weeks and topics tables before each test so we don't have to worry about reinserting the same id
   // We have to clear the week table because topic depends on week
   await knex(topicModel.TOPIC_TABLE_NAME).del();
   await knex(weekModel.WEEK_TABLE_NAME).del();
-  await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1" });
+  await knex(instructorModel.INSTRUCTOR_TABLE_NAME).del();
+  await knex(instructorModel.INSTRUCTOR_TABLE_NAME).insert({ id: 1, name: "Sampat" })
+  await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1", instructor_id: 1 });
 });
 
 test.serial("insertForWeek > Returns the inserted topic", async (t) => {
