@@ -36,7 +36,7 @@ npm test path/to/file.test.js
 
 Example:
 ```
-npm test src/models/week/index.test.js
+npm test src/models/topic/index.test.js
 ```
 
 ## TODO
