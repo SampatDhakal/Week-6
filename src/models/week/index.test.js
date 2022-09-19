@@ -61,19 +61,13 @@ test.serial(
     t.plan(1);
     await weekModel.insertWeek(1, "Week #1");
     const dbQueryResult = await weekModel.findAllWeeks();
-    const expectedResult = [{ number: 1, name: "Week #1" }];
+    const expectedResult = await knex(weekModel.WEEK_TABLE_NAME);
   t.deepEqual(
     dbQueryResult,
     expectedResult,
-    "Must return the inserted object in an array"
+    "Must return all the weeks in the database"
   );
     
   }
 );
 
-// test.todo("insertWeeks > Returns the inserted weeks");
-// test.todo("insertWeeks > Weeks are actually inserted in the database");
-// test.todo(
-//   "insertWeeks > Throws when an existing week number is inserted again"
-// );
-// test.todo("findAllWeeks > Returns all weeks in the database");

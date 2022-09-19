@@ -6,14 +6,14 @@ const weekModel = require("../week");
 test.beforeEach(async () => {
   // Clear the weeks and topics tables before each test so we don't have to worry about reinserting the same id
   // We have to clear the week table because topic depends on week
-  await knex(weekModel.WEEK_TABLE_NAME).del();
   await knex(topicModel.TOPIC_TABLE_NAME).del();
+  await knex(weekModel.WEEK_TABLE_NAME).del();
+  await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1" });
 });
 
 test.serial("insertForWeek > Returns the inserted topic", async (t) => {
   t.plan(4);
   // We setup the test by inserting a topic to the database
-  await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1" });
   const result = await topicModel.insertForWeek(1, "HTML & CSS");
   t.is(result.length, 1, "Must return one item");
 
@@ -35,7 +35,6 @@ test.serial(
   "insertForWeek > Throws when trying to insert a topic for a non existent week",
   async (t) => {
     t.plan(1);
-    await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1" });
     await t.throwsAsync(
       () => topicModel.insertForWeek(2, "HTML & CSS"),
       { instanceOf: Error },
@@ -45,37 +44,84 @@ test.serial(
 );
 
 test.serial(
-  "updateTopicById > Updates a topic",
+  "updateTopicById > Returns the updated topic",
   async (t) => {
-    t.plan(2);
-    // We setup the test by inserting a topic to the database
-    await knex(weekModel.WEEK_TABLE_NAME).insert({ number: 1, name: "Week #1" });
+    t.plan(1);
     const result = await topicModel.insertForWeek(1, "HTML & CSS");
-    const updateditem = await topicModel.updateTopicById(result.id, { name: "HTML & JAVA", week_number: 2 });
-    const expectedResult = { week_number: 2, name: "HTML & JAVA" };
-    t.is(
-      updateditem.week_number,
-      expectedResult.week_number,
-      "Must have correct week number"
+    const updateditem = await topicModel.updateTopicById(result[0].id, { name: "HTML&JAVA", week_number: 1 });
+    const expectedResult = [{ id: result[0].id, name: "HTML&JAVA", week_number: 1 }];
+    t.deepEqual(
+      updateditem,
+      expectedResult,
+      "Must be updated"
     );
-    t.is(updateditem.name, expectedResult.name, "Must have correct name");
   });
 
+test.serial("updateTopicById > Updates a topic",
+  async (t) => {
+    await topicModel.insertForWeek(1, "HTML & CSS")
+    const dbQuery = await knex(topicModel.TOPIC_TABLE_NAME).where(
+      "week_number",
+      1
+    )
+    const result = await topicModel.updateTopicById(dbQuery[0].id, { name: "HTML&JAVA" })
+    const expectedResult = await knex(topicModel.TOPIC_TABLE_NAME).where(
+      "week_number",
+      1
+    )
+    t.deepEqual(
+      result,
+      expectedResult,
+      "Must return updated values by id")
+  });
 
+test.serial(
+  "searchTopicWithWeekData > Returns topics matching the passed string",
+  async (t) => {
+    t.plan(1);
+    await topicModel.insertForWeek(1, "HTML & CSS")
+    const dbQuery = await knex(topicModel.TOPIC_TABLE_NAME).where(
+      "week_number",
+      1
+    )
+    const searcheditem = await topicModel.searchTopicWithWeekData("HTML");
+    const expectedResult = [{ id: dbQuery[0].id, week_name: 'Week #1', week_number: 1, name: "HTML & CSS", }];
+    t.deepEqual(
+      searcheditem,
+      expectedResult,
+      "Must return the topic with matching result"
+    );
+  });
+
+test.serial(
+  "searchTopicWithWeekData > Returns empty array if no topics match the query",
+  async (t) => {
+    await topicModel.insertForWeek(1, "HTML & CSS")
+    const result = await topicModel.searchTopicWithWeekData("haha")
+    const expectedResult = []
+    t.deepEqual(
+      result,
+      expectedResult,
+      "Must return empty not matching topics of the passed argument")
+  }
+);
+
+test.serial("deleteTopicById > Deletes the topic whose id is passed as an argument",
+  async (t) => {
+    await topicModel.insertForWeek(1, "HTML & CSS")
+    const dbQuery = await knex(topicModel.TOPIC_TABLE_NAME).where(
+      "week_number",
+      1
+    )
+    const result = await topicModel.deleteTopicById(dbQuery[0].id)
+    const expectedResult = 1;
+    t.deepEqual(
+      result,
+      expectedResult,
+      "Must return inserted object in an array")
+  });
 
 test.todo(
   "insertForWeek > Topics are actually inserted in the database"
-);
-test.todo(
-  "updateTopicById > Returns the updated topic"
-);
-test.todo(
-  "searchTopicWithWeekData > Returns topics matching the passed string"
-);
-test.todo(
-  "searchTopicWithWeekData > Returns empty array if no topics match the query"
-);
-test.todo(
-  "deleteTopicById > Deletes the topic whose id is passed as an argument"
 );
 test.todo("deleteTopicById > Does not throw when deleting non-existent topic");
