@@ -55,9 +55,25 @@ test.serial(
   }
 );
 
-test.todo("insertWeeks > Returns the inserted weeks");
-test.todo("insertWeeks > Weeks are actually inserted in the database");
-test.todo(
-  "insertWeeks > Throws when an existing week number is inserted again"
+test.serial(
+  "findAllWeeks > Returns all weeks in the database",
+  async (t) => {
+    t.plan(1);
+    await weekModel.insertWeek(1, "Week #1");
+    const dbQueryResult = await weekModel.findAllWeeks();
+    const expectedResult = [{ number: 1, name: "Week #1" }];
+  t.deepEqual(
+    dbQueryResult,
+    expectedResult,
+    "Must return the inserted object in an array"
+  );
+    
+  }
 );
-test.todo("findAllWeeks > Returns all weeks in the database");
+
+// test.todo("insertWeeks > Returns the inserted weeks");
+// test.todo("insertWeeks > Weeks are actually inserted in the database");
+// test.todo(
+//   "insertWeeks > Throws when an existing week number is inserted again"
+// );
+// test.todo("findAllWeeks > Returns all weeks in the database");

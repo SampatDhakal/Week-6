@@ -31,7 +31,7 @@ test.serial("insertForWeek > Returns the inserted topic", async (t) => {
   t.is(insertedItem.name, expectedResult.name, "Must have correct name");
 });
 
-test.todo("insertForWeek > Returns the inserted weeks");
+test.todo("insertForWeek > Returns the inserted topic");
 test.todo("insertForWeek > Topics are actually inserted in the database");
 test.todo(
   "insertForWeek > Throws when trying to insert a topic for a non existent week"
